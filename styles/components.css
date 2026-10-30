@@ -1,0 +1,380 @@
+/**
+ * styles/components.css
+ * Componentes minimalistas: barra de ajustes rápidos, chips de rutinas y modal de preferencias.
+ */
+
+.quick-bar {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 22px;
+  padding: 1rem 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+/* Chips de Preajustes Rápidos */
+.preset-chips {
+  display: flex;
+  gap: 0.45rem;
+  overflow-x: auto;
+  padding-bottom: 0.15rem;
+  scrollbar-width: none;
+}
+
+.preset-chips::-webkit-scrollbar {
+  display: none;
+}
+
+.chip {
+  flex: 1;
+  min-width: 96px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 14px;
+  border: 1px solid var(--border-subtle);
+  background-color: var(--bg-pill);
+  color: var(--text-secondary);
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  white-space: nowrap;
+}
+
+.chip strong {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.chip span {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.chip:hover {
+  border-color: var(--border-focus);
+  background-color: var(--bg-surface-hover);
+}
+
+.chip.active {
+  border-color: var(--accent);
+  background-color: var(--accent-soft);
+}
+
+.chip.active strong,
+.chip.active span {
+  color: var(--accent);
+}
+
+/* Fila de controles compactos en línea */
+.inline-controls-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 0.6rem;
+}
+
+.inline-controls-row.sub-row {
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.compact-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.28rem;
+}
+
+.compact-field label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+
+.compact-field input,
+.compact-field select {
+  width: 100%;
+  padding: 0.5rem 0.65rem;
+  border-radius: 11px;
+  border: 1px solid var(--border-subtle);
+  background-color: var(--bg-pill);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  transition: border-color 0.15s ease;
+}
+
+.compact-field input:focus,
+.compact-field select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.summary-banner {
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-align: center;
+  padding-top: 0.2rem;
+}
+
+/* Tira minimalista de Rutinas Guardadas */
+.saved-strip {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 20px;
+  padding: 0.85rem 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.saved-strip-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.saved-strip-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.save-inline-form {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: 1;
+  max-width: 300px;
+}
+
+.save-inline-form input {
+  flex: 1;
+  padding: 0.38rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-subtle);
+  background-color: var(--bg-pill);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.78rem;
+}
+
+.save-inline-form input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.btn-save-profile {
+  padding: 0.38rem 0.8rem;
+  border-radius: 999px;
+  border: none;
+  background-color: var(--accent);
+  color: #090a0f;
+  font-family: inherit;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-save-profile:hover {
+  opacity: 0.9;
+}
+
+/* Píldoras horizontales de rutinas guardadas */
+.saved-profiles-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.saved-profile-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.32rem 0.4rem 0.32rem 0.75rem;
+  border-radius: 999px;
+  background-color: var(--bg-pill);
+  border: 1px solid var(--border-subtle);
+  transition: border-color 0.15s ease;
+}
+
+.saved-profile-item:hover {
+  border-color: var(--border-focus);
+}
+
+.saved-profile-info {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.saved-profile-info strong {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.saved-profile-info span {
+  display: none;
+}
+
+.saved-profile-actions {
+  display: flex;
+  align-items: center;
+}
+
+.btn-load-prof {
+  display: none;
+}
+
+.btn-del-prof {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-del-prof:hover {
+  background-color: rgba(239, 68, 68, 0.18);
+  color: #ef4444;
+}
+
+.empty-profiles {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+}
+
+/* Modal Minimalista de Ajustes y Sonido */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 1000;
+}
+
+.modal-sheet {
+  width: 100%;
+  max-width: 420px;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-focus);
+  border-radius: 24px;
+  padding: 1.35rem;
+  box-shadow: var(--shadow-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-header h2 {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.95rem;
+}
+
+.sound-test-row,
+.io-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.btn-small {
+  flex: 1;
+  padding: 0.45rem 0.65rem;
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+  background-color: var(--bg-pill);
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-small:hover {
+  color: var(--text-primary);
+  border-color: var(--accent);
+}
+
+.switches-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 0.65rem 0;
+  border-top: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.switch-row input {
+  accent-color: var(--accent);
+  width: 16px;
+  height: 16px;
+}
+
+@media (max-width: 600px) {
+  .inline-controls-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .compact-field:has(select) {
+    grid-column: 1 / -1;
+  }
+
+  .compact-field input,
+  .compact-field select,
+  .save-inline-form input {
+    font-size: 16px;
+  }
+
+  .save-inline-form {
+    max-width: none;
+    width: 100%;
+  }
+}
