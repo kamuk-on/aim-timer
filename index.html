@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>AimTimer — Archery Timer</title>
+  <link rel="icon" type="image/png" href="assets/icon-512.png" />
+  <link rel="apple-touch-icon" href="assets/icon-512.png" />
+
+  <!-- Tipografía Moderna -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@600;700;800&display=swap"
+    rel="stylesheet" />
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function (registrations) {
+        for (let registration of registrations) {
+          registration.unregister();
+        }
+      });
+    }
+    if ('caches' in window) {
+      caches.keys().then(function (keys) {
+        for (let key of keys) {
+          caches.delete(key);
+        }
+      });
+    }
+  </script>
+
+  <!-- Hojas de estilo modulares -->
+  <link rel="stylesheet" href="styles/base.css?v=10" />
+  <link rel="stylesheet" href="styles/layout.css?v=10" />
+  <link rel="stylesheet" href="styles/stage.css?v=10" />
+  <link rel="stylesheet" href="styles/components.css?v=10" />
+</head>
+
+<body>
+  <div class="app-shell">
+    <!-- Minimalist Top Navigation -->
+    <header class="app-header" id="appHeader">
+      <div class="brand">
+        <div class="brand-icon">
+          <img src="assets/isotipo.png" alt="AimTimer" class="brand-logo" width="32" height="32" />
+        </div>
+        <span class="brand-title">Aim+ Timer</span>
+      </div>
+
+      <!-- Segmented Mode Control -->
+      <nav class="mode-tabs" role="tablist" aria-label="Modo de temporizador">
+        <button class="mode-tab active" role="tab" aria-selected="true" data-mode="competition">
+          Competencia
+        </button>
+        <button class="mode-tab" role="tab" aria-selected="false" data-mode="holding">
+          Mantenciones
+        </button>
+        <button class="mode-tab" role="tab" aria-selected="false" data-mode="nested7x3">
+          Serie 7×3
+        </button>
+      </nav>
+
+      <!-- Minimal Utility Icons -->
+      <div class="header-actions">
+        <button class="icon-btn" id="btnOpenSettings" title="Sonido y Ajustes" aria-label="Ajustes">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+          </svg>
+        </button>
+
+        <button class="icon-btn" id="btnThemeToggle" title="Cambiar tema claro / oscuro" aria-label="Cambiar tema">
+          <svg class="icon-sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Centered Workspace -->
+    <main class="main-layout">
+      <!-- HERO TIMER CARD -->
+      <section class="timer-stage state-idle" id="timerStage" aria-live="polite">
+        <div class="stage-top-bar">
+          <div class="stage-badges">
+            <span class="status-pill hidden" id="stageModeLabel">COMPETENCIA</span>
+            <span class="phase-pill" id="phaseBanner">LISTO</span>
+            <span class="line-pill" id="stageLineBadge">AB / CD</span>
+            <span class="beeps-pill" id="stageBeepIndicator">WA</span>
+          </div>
+
+          <button class="stage-mini-btn" id="btnToggleHud" title="Pantalla completa (F)">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+            </svg>
+            <span id="hudBtnText">Expandir</span>
+          </button>
+        </div>
+
+        <!-- Giant Minimalist Countdown -->
+        <div class="clock-wrapper">
+          <span class="clock-digits" id="clockDisplay">240</span>
+          <span class="clock-tenths" id="clockTenths">.0</span>
+        </div>
+
+        <!-- Subtle Progress Line -->
+        <div class="progress-track" aria-hidden="true">
+          <div class="progress-fill" id="progressBar" style="width: 100%"></div>
+        </div>
+
+        <!-- Minimal Inline Metrics -->
+        <div class="stage-metrics" id="stageMetrics">
+          <div class="metric-box">
+            <span class="metric-label" id="metric1Label">Tanda</span>
+            <span class="metric-value" id="metric1Value">1</span>
+          </div>
+          <div class="metric-divider"></div>
+          <div class="metric-box">
+            <span class="metric-label" id="metric2Label">Línea</span>
+            <span class="metric-value" id="metric2Value">AB</span>
+          </div>
+          <div class="metric-divider"></div>
+          <div class="metric-box">
+            <span class="metric-label" id="metric3Label">Prep</span>
+            <span class="metric-value" id="metric3Value">10s</span>
+          </div>
+        </div>
+
+        <!-- Clean Transport Controls -->
+        <div class="transport-controls">
+          <button class="btn-transport btn-ghost-action" id="btnReset" title="Reiniciar (R)" aria-label="Reiniciar">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="1 4 1 10 7 10"></polyline>
+              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+            </svg>
+          </button>
+
+          <button class="btn-transport btn-primary-action" id="btnStartPause">
+            <svg id="iconPlay" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+              <polygon points="6 4 20 12 6 20 6 4"></polygon>
+            </svg>
+            <svg id="iconPause" class="hidden" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+              <rect x="6" y="4" width="4" height="16" rx="1"></rect>
+              <rect x="14" y="4" width="4" height="16" rx="1"></rect>
+            </svg>
+            <span id="startPauseText">Iniciar</span>
+          </button>
+
+          <button class="btn-transport btn-secondary-action hidden" id="btnNextTurn" title="Siguiente turno o fase (N)">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="5 4 15 12 5 20 5 4"></polygon>
+              <line x1="19" y1="5" x2="19" y2="19"></line>
+            </svg>
+            <span id="nextTurnText">Siguiente</span>
+          </button>
+
+          <button class="btn-transport btn-danger-action" id="btnEmergencyStop" title="Finalizar con 3 pitidos (E)">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+              <rect x="5" y="5" width="14" height="14" rx="2"></rect>
+            </svg>
+            <span>Fin</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- MINIMALIST CONFIGURATION SECTION -->
+      <section class="config-panel" id="configPanel">
+        <!-- 1. Competition Mode -->
+        <div class="mode-config active" id="config-competition">
+          <div class="quick-bar">
+            <div class="preset-chips" id="waQuickPresets">
+              <button type="button" class="chip active" data-wa-preset="outdoor6">
+                <strong>240s</strong>
+                <span>6 flechas</span>
+              </button>
+              <button type="button" class="chip" data-wa-preset="indoor3">
+                <strong>120s</strong>
+                <span>3 flechas</span>
+              </button>
+              <button type="button" class="chip" data-wa-preset="altIndividual">
+                <strong>20s</strong>
+                <span>Alterno</span>
+              </button>
+              <button type="button" class="chip" data-wa-preset="mixedTeam">
+                <strong>80s</strong>
+                <span>Mixto</span>
+              </button>
+              <button type="button" class="chip" data-wa-preset="singleEnd3">
+                <strong>120s</strong>
+                <span>1 Línea</span>
+              </button>
+            </div>
+
+            <div class="inline-controls-row">
+              <div class="compact-field">
+                <label for="compFormat">Secuencia</label>
+                <select id="compFormat">
+                  <option value="single">Línea Única</option>
+                  <option value="abcd" selected>Dos Turnos (AB / CD)</option>
+                  <option value="ab">Dos Turnos (A / B)</option>
+                  <option value="alternating">Tiro Alterno (A vs B)</option>
+                </select>
+              </div>
+
+              <div class="compact-field">
+                <label for="compShootTime">Tiro (s)</label>
+                <input type="number" id="compShootTime" min="5" max="600" value="240" />
+              </div>
+
+              <div class="compact-field">
+                <label for="compWarnTime">Aviso (s)</label>
+                <input type="number" id="compWarnTime" min="0" max="180" value="30" />
+              </div>
+
+              <div class="compact-field">
+                <label for="compPrepTime">Prep (s)</label>
+                <input type="number" id="compPrepTime" min="0" max="60" value="10" />
+              </div>
+
+              <div class="compact-field">
+                <label for="compExternalScreens">Proyectar</label>
+                <select id="compExternalScreens"
+                  title="Pestañas de pantalla completa que se abrirán automáticamente al iniciar">
+                  <option value="0" selected>Sin pantallas extra</option>
+                  <option value="1">1 Pantalla externa</option>
+                  <option value="2">2 Pantallas externas</option>
+                  <option value="3">3 Pantallas externas</option>
+                  <option value="4">4 Pantallas externas</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Extra options only when Alternating Match Play is active -->
+            <div class="inline-controls-row sub-row hidden" id="altMatchOptions">
+              <div class="compact-field">
+                <label for="altFirstArcher">Inicia</label>
+                <select id="altFirstArcher">
+                  <option value="A">Arquero A</option>
+                  <option value="B">Arquero B</option>
+                </select>
+              </div>
+              <div class="compact-field">
+                <label for="altArrowsPerArcher">Flechas/Arq</label>
+                <input type="number" id="altArrowsPerArcher" min="1" max="12" value="3" />
+              </div>
+              <div class="compact-field">
+                <label for="altBufferTime">Pausa A↔B (s)</label>
+                <input type="number" id="altBufferTime" min="0" max="15" value="0" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Bowtraining Mantenciones (Tabata) -->
+        <div class="mode-config" id="config-holding">
+          <div class="quick-bar">
+            <div class="preset-chips" id="holdQuickPresets">
+              <button type="button" class="chip" data-hold-preset="15-30-10">
+                <strong>15s / 30s</strong>
+                <span>10 series</span>
+              </button>
+              <button type="button" class="chip active" data-hold-preset="20-20-12">
+                <strong>20s / 20s</strong>
+                <span>12 series</span>
+              </button>
+              <button type="button" class="chip" data-hold-preset="30-30-8">
+                <strong>30s / 30s</strong>
+                <span>8 series</span>
+              </button>
+              <button type="button" class="chip" data-hold-preset="45-45-6">
+                <strong>45s / 45s</strong>
+                <span>6 series</span>
+              </button>
+            </div>
+
+            <div class="inline-controls-row">
+              <div class="compact-field">
+                <label for="holdWorkTime">Mantener (s)</label>
+                <input type="number" id="holdWorkTime" min="1" max="300" value="20" />
+              </div>
+              <div class="compact-field">
+                <label for="holdRestTime">Descanso (s)</label>
+                <input type="number" id="holdRestTime" min="1" max="300" value="20" />
+              </div>
+              <div class="compact-field">
+                <label for="holdSeriesCount">Series</label>
+                <input type="number" id="holdSeriesCount" min="1" max="100" value="12" />
+              </div>
+              <div class="compact-field">
+                <label for="holdPrepTime">Prep (s)</label>
+                <input type="number" id="holdPrepTime" min="0" max="60" value="10" />
+              </div>
+            </div>
+
+            <div class="summary-banner" id="holdSummaryBanner"></div>
+          </div>
+        </div>
+
+        <!-- 3. Bowtraining 7x3 (Nested Series) -->
+        <div class="mode-config" id="config-nested7x3">
+          <div class="quick-bar">
+            <div class="preset-chips" id="nestedQuickPresets">
+              <button type="button" class="chip active" data-nested-preset="clasico">
+                <strong>7s / 3s</strong>
+                <span>4 rondas × 6</span>
+              </button>
+              <button type="button" class="chip" data-nested-preset="intermedio">
+                <strong>8s / 3s</strong>
+                <span>5 rondas × 7</span>
+              </button>
+              <button type="button" class="chip" data-nested-preset="elite">
+                <strong>10s / 3s</strong>
+                <span>6 rondas × 6</span>
+              </button>
+            </div>
+
+            <div class="inline-controls-row">
+              <div class="compact-field">
+                <label for="nestedRoundsA">Rondas</label>
+                <input type="number" id="nestedRoundsA" min="1" max="50" value="4" />
+              </div>
+              <div class="compact-field">
+                <label for="nestedRepsB">Series</label>
+                <input type="number" id="nestedRepsB" min="1" max="50" value="6" />
+              </div>
+              <div class="compact-field">
+                <label for="nestedHoldX">Mantener (s)</label>
+                <input type="number" id="nestedHoldX" min="1" max="120" value="7" />
+              </div>
+              <div class="compact-field">
+                <label for="nestedRestY">Pausa (s)</label>
+                <input type="number" id="nestedRestY" min="1" max="120" value="3" />
+              </div>
+              <div class="compact-field">
+                <label for="nestedMacroRestC">Desc. Ronda (s)</label>
+                <input type="number" id="nestedMacroRestC" min="5" max="600" value="120" />
+              </div>
+              <div class="compact-field">
+                <label for="nestedPrepTime">Prep (s)</label>
+                <input type="number" id="nestedPrepTime" min="0" max="60" value="10" />
+              </div>
+            </div>
+
+            <div class="summary-banner" id="nestedSummaryBanner"></div>
+          </div>
+        </div>
+
+        <!-- Minimal Saved Routines Strip -->
+        <div class="saved-strip">
+          <div class="saved-strip-header">
+            <span class="saved-strip-title">Mis rutinas</span>
+            <div class="save-inline-form">
+              <input type="text" id="customProfileName" placeholder="Guardar actual como..." maxlength="35" />
+              <button type="button" class="btn-save-profile" id="btnSaveProfile">Guardar</button>
+            </div>
+          </div>
+          <div class="saved-profiles-list" id="savedProfilesList"></div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Minimalist Footer -->
+    <footer class="app-footer">
+      <div class="footer-meta">
+        <span>AimTimer <strong>v1.0.0</strong></span>
+        <span class="footer-dot" aria-hidden="true">·</span>
+        <span>Creado por <a href="https://github.com/kamuk-on" target="_blank"
+            rel="noopener noreferrer">kamuk-on</a></span>
+      </div>
+
+      <a href="https://play.google.com/store" target="_blank" rel="noopener noreferrer" class="play-store-pill"
+        aria-label="Disponible en Google Play">
+        <svg class="play-store-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M3.609 1.814L13.792 12 3.61 22.186a1.98 1.98 0 0 1-.49-.922V2.736c0-.342.176-.668.489-.922zm10.89 10.893l2.302 2.302-10.937 6.333 8.635-8.635zm3.199-3.198l2.807 1.626a1 1 0 0 1 0 1.73l-2.808 1.626L15.206 12l2.492-2.491zM5.864 2.658L16.8 8.99l-2.302 2.302-8.634-8.634z" />
+        </svg>
+        <span>Disponible en <strong>Google Play</strong></span>
+      </a>
+    </footer>
+  </div>
+
+  <!-- Minimalist Settings Drawer / Modal (Hidden until gear/sound icon is clicked) -->
+  <div class="modal-backdrop hidden" id="settingsModal">
+    <div class="modal-sheet" role="dialog" aria-labelledby="settingsTitle">
+      <div class="modal-header">
+        <h2 id="settingsTitle">Sonido y Preferencias</h2>
+        <button type="button" class="icon-btn" id="btnCloseSettings" aria-label="Cerrar">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="compact-field">
+          <label for="soundProfile">Timbre Oficial World Archery</label>
+          <select id="soundProfile">
+            <option value="danage" selected>Danage DOM (Buzzer 850Hz)</option>
+            <option value="chronotir">Chronotir Klaxon (Campo)</option>
+            <option value="wa_arena">World Archery TV (1000Hz)</option>
+            <option value="whistle">Silbato Juez DOS</option>
+            <option value="custom">Audio Personalizado (.wav / .mp3)</option>
+          </select>
+        </div>
+
+        <div class="compact-field hidden" id="customAudioGroup">
+          <label for="fileCustomAudio">Archivo de audio (.mp3 / .wav)</label>
+          <input type="file" id="fileCustomAudio" accept="audio/*" />
+        </div>
+
+        <div class="compact-field">
+          <label for="soundVolume">Volumen (<span id="volLabel">100%</span>)</label>
+          <input type="range" id="soundVolume" min="10" max="100" value="100" />
+        </div>
+
+        <div class="sound-test-row">
+          <button type="button" class="btn-small" id="btnTestSound">Probar 1 Pitido</button>
+          <button type="button" class="btn-small" id="btnTest1Beep">1 Pitido</button>
+          <button type="button" class="btn-small" id="btnTest2Beeps">2 Pitidos</button>
+          <button type="button" class="btn-small" id="btnTest3Beeps">3 Pitidos</button>
+        </div>
+
+        <div class="switches-group">
+          <label class="switch-row">
+            <span>Pantalla completa automática al iniciar</span>
+            <input type="checkbox" id="chkAutoHud" checked />
+          </label>
+          <label class="switch-row">
+            <span>Ticks 3-2-1 en Bowtraining</span>
+            <input type="checkbox" id="chkCountdownPips" checked />
+          </label>
+        </div>
+
+        <div class="io-row">
+          <button type="button" class="btn-small" id="btnExportProfiles">Exportar rutinas JSON</button>
+          <button type="button" class="btn-small" id="btnImportProfiles">Importar JSON</button>
+          <input type="file" id="fileImportProfiles" accept=".json" class="hidden" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Clean Architecture Modules -->
+  <script src="src/domain/presets.js?v=9"></script>
+  <script src="src/domain/sequenceBuilder.js?v=9"></script>
+  <script src="src/infrastructure/soundEngine.js?v=9"></script>
+  <script src="src/infrastructure/storageRepo.js?v=9"></script>
+  <script src="src/infrastructure/displaySync.js?v=9"></script>
+  <script src="src/application/timerService.js?v=9"></script>
+  <script src="src/application/profileService.js?v=9"></script>
+  <script src="src/presentation/domElements.js?v=9"></script>
+  <script src="src/presentation/stageView.js?v=9"></script>
+  <script src="src/presentation/controller.js?v=9"></script>
+  <script src="src/main.js?v=9"></script>
+</body>
+
+</html>

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AimTimer — Pantalla de Línea (Proyección)</title>
+  <link rel="icon" type="image/png" href="assets/icon-512.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles/base.css?v=8" />
+  <link rel="stylesheet" href="styles/stage.css?v=8" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #090a0f;
+      user-select: none;
+    }
+
+    .projection-stage {
+      position: fixed;
+      inset: 0;
+      border-radius: 0 !important;
+      border: none !important;
+      padding: 2.5rem 4rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100vh;
+      height: 100dvh;
+      width: 100vw;
+    }
+
+    .projection-stage .phase-pill {
+      font-size: clamp(1.3rem, 2.8vw, 2.25rem);
+      padding: 0.55rem 1.5rem;
+    }
+
+    .projection-stage .line-pill,
+    .projection-stage .beeps-pill {
+      font-size: clamp(1.1rem, 2.2vw, 1.8rem);
+      padding: 0.5rem 1.25rem;
+    }
+
+    .projection-stage .clock-digits {
+      font-size: clamp(8rem, 28vw, 25rem);
+      line-height: 0.9;
+    }
+
+    .projection-stage .clock-tenths {
+      font-size: clamp(2.8rem, 8.5vw, 7.5rem);
+    }
+
+    .projection-stage .progress-track {
+      height: 8px;
+    }
+
+    .projection-stage .metric-label {
+      font-size: clamp(0.85rem, 1.5vw, 1.25rem);
+    }
+
+    .projection-stage .metric-value {
+      font-size: clamp(1.8rem, 4vw, 3.6rem);
+    }
+
+    .projection-stage .metric-divider {
+      height: 44px;
+    }
+
+    /* Botón discreto para poner en pantalla completa el monitor externo */
+    .fullscreen-fab {
+      opacity: 0.35;
+      transition: opacity 0.25s ease;
+    }
+
+    body:hover .fullscreen-fab {
+      opacity: 1;
+    }
+
+    :fullscreen .fullscreen-fab {
+      opacity: 0;
+    }
+
+    :fullscreen:hover .fullscreen-fab {
+      opacity: 0.85;
+    }
+  </style>
+</head>
+
+<body>
+  <section class="timer-stage projection-stage state-idle" id="projectionStage" aria-live="polite">
+    <div class="stage-top-bar">
+      <div class="stage-badges">
+        <span class="phase-pill" id="projPhase">LISTO</span>
+        <span class="line-pill" id="projLine">AB / CD</span>
+        <span class="beeps-pill" id="projBeep">WA</span>
+      </div>
+
+      <button class="stage-mini-btn fullscreen-fab" id="btnFullscreen" title="Pantalla Completa en este monitor (Doble clic en cualquier parte)">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+        </svg>
+        <span id="fsText">Pantalla Completa</span>
+      </button>
+    </div>
+
+    <div class="clock-wrapper">
+      <span class="clock-digits" id="projDigits">240</span>
+      <span class="clock-tenths" id="projTenths">.0</span>
+    </div>
+
+    <div class="progress-track" aria-hidden="true">
+      <div class="progress-fill" id="projProgress" style="width: 100%"></div>
+    </div>
+
+    <div class="stage-metrics">
+      <div class="metric-box">
+        <span class="metric-label" id="projM1Label">Tanda</span>
+        <span class="metric-value" id="projM1Value">1</span>
+      </div>
+      <div class="metric-divider"></div>
+      <div class="metric-box">
+        <span class="metric-label" id="projM2Label">Inicia</span>
+        <span class="metric-value" id="projM2Value">AB</span>
+      </div>
+      <div class="metric-divider"></div>
+      <div class="metric-box">
+        <span class="metric-label" id="projM3Label">Prep</span>
+        <span class="metric-value" id="projM3Value">10s</span>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    (function () {
+      const stage = document.getElementById('projectionStage');
+      const projPhase = document.getElementById('projPhase');
+      const projLine = document.getElementById('projLine');
+      const projBeep = document.getElementById('projBeep');
+      const projDigits = document.getElementById('projDigits');
+      const projTenths = document.getElementById('projTenths');
+      const projProgress = document.getElementById('projProgress');
+      const projM1Label = document.getElementById('projM1Label');
+      const projM1Value = document.getElementById('projM1Value');
+      const projM2Label = document.getElementById('projM2Label');
+      const projM2Value = document.getElementById('projM2Value');
+      const projM3Label = document.getElementById('projM3Label');
+      const projM3Value = document.getElementById('projM3Value');
+      const btnFullscreen = document.getElementById('btnFullscreen');
+      const fsText = document.getElementById('fsText');
+
+      const params = new URLSearchParams(window.location.search);
+      const screenNum = params.get('screen') || '1';
+      document.title = `AimTimer — Pantalla ${screenNum}`;
+
+      function applySnapshot(data) {
+        if (!data || data.type !== 'AIMTIMER_SYNC') return;
+
+        stage.classList.remove('state-idle', 'state-red', 'state-green', 'state-amber', 'state-blue');
+        stage.classList.add(data.colorClass || 'state-idle');
+
+        projPhase.textContent = data.phaseText || 'Listo';
+        projLine.textContent = data.lineText || '';
+        projBeep.textContent = data.beepText || 'WA';
+        projBeep.classList.toggle('active-beep', Boolean(data.isBeepActive));
+
+        projDigits.textContent = data.digits || '0';
+        projTenths.textContent = data.tenths || '.0';
+        projProgress.style.width = data.progressWidth || '100%';
+
+        if (data.metrics && data.metrics.length === 3) {
+          projM1Label.textContent = data.metrics[0].label;
+          projM1Value.textContent = data.metrics[0].value;
+          projM2Label.textContent = data.metrics[1].label;
+          projM2Value.textContent = data.metrics[1].value;
+          projM3Label.textContent = data.metrics[2].label;
+          projM3Value.textContent = data.metrics[2].value;
+        }
+      }
+
+      // 1. Escuchar mensajes directos desde la ventana principal (funciona en file:// y http://)
+      window.addEventListener('message', (event) => {
+        applySnapshot(event.data);
+      });
+
+      // 2. Escuchar BroadcastChannel (para pestañas adicionales en el mismo origen)
+      try {
+        const bc = new BroadcastChannel('aimtimer_sync_v1');
+        bc.onmessage = (event) => applySnapshot(event.data);
+      } catch (err) {
+        // Ignorar si el navegador restringe BroadcastChannel en file://
+      }
+
+      // 3. Escuchar cambios en localStorage como respaldo universal
+      window.addEventListener('storage', (event) => {
+        if (event.key === 'aimtimer_live_snapshot' && event.newValue) {
+          try {
+            applySnapshot(JSON.parse(event.newValue));
+          } catch (err) {}
+        }
+      });
+
+      // Cargar último estado conocido al abrir la ventana
+      try {
+        const initialRaw = localStorage.getItem('aimtimer_live_snapshot');
+        if (initialRaw) {
+          applySnapshot(JSON.parse(initialRaw));
+        }
+      } catch (err) {}
+
+      // Solicitar sincronización a la ventana padre
+      if (window.opener && !window.opener.closed) {
+        try {
+          window.opener.postMessage({ type: 'AIMTIMER_REQUEST_SYNC' }, '*');
+        } catch (err) {}
+      }
+
+      // Pantalla completa con el botón o doble clic
+      function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+          document.exitFullscreen().catch(() => {});
+        }
+      }
+
+      btnFullscreen.addEventListener('click', toggleFullscreen);
+      document.addEventListener('dblclick', toggleFullscreen);
+      document.addEventListener('fullscreenchange', () => {
+        fsText.textContent = document.fullscreenElement ? 'Salir' : 'Pantalla Completa';
+      });
+    })();
+  </script>
+</body>
+
+</html>
+
